@@ -17,7 +17,8 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
-from fastapi import FastAPI                     # noqa: E402
+from fastapi import FastAPI, Request            # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.responses import JSONResponse      # noqa: E402
 from pydantic import BaseModel, Field           # noqa: E402
 
@@ -41,6 +42,13 @@ PENDING: dict[str, float] = {}
 
 app = FastAPI(title="Vera — magicpin merchant AI")
 app.include_router(demo_router)   # demo UI at / (isolated state; the judge only uses /v1/*)
+
+
+@app.exception_handler(RequestValidationError)
+async def malformed_request(request: Request, exc: RequestValidationError):
+    """The testing brief specifies 400 (not FastAPI's default 422) for malformed bodies."""
+    details = "; ".join(f"{'.'.join(str(p) for p in e.get('loc', ()))}: {e.get('msg')}" for e in exc.errors())
+    return JSONResponse(status_code=400, content={"accepted": False, "reason": "malformed_request", "details": details})
 
 
 # ----------------------------------------------------------------------------- offline entry point
