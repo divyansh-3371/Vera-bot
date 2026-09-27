@@ -46,6 +46,16 @@ TRIGGER = {"id": "t1", "kind": "research_digest", "scope": "merchant", "payload"
     ("Haan interesting hai, par kitna time lagega?", "question"),
     ("Sounds good but what does it cost?", "question"),
     ("busy right now, call later", "later"),
+    # edge cases: negations and words that only look like a routing keyword
+    ("don't stop, go ahead", "accept"),
+    ("stop worrying, let's do it", "accept"),
+    ("please stop", "opt_out"),
+    ("I'm not busy, tell me more", "engage"),
+    ("Will the heatwave weather affect my sales?", "question"),
+    ("you idiots", "hostile"),
+    ("this is irritating", "hostile"),
+    ("मुझे नहीं चाहिए", "not_interested"),
+    ("मैसेज मत भेजो", "opt_out"),
 ])
 def test_classify(text, expected):
     assert classify(text) == expected
@@ -127,6 +137,27 @@ def test_reply_fallbacks_never_repeat():
     v = _fallback_variants("ANSWER", "draft 3 posts", "Dr. Meera", "hinglish", False)
     assert len(set(v)) == len(v) >= 2
     assert all("go ahead with draft" not in x for x in v)
+
+
+def test_send_never_repeats_verbatim():
+    from vera.replies import _send
+    from vera.store import Conversation
+    conv = Conversation("c1", "m_1")
+    bodies = [_send(conv, "I'll check and update you here.", "open_ended", "")["body"] for _ in range(8)]
+    assert len(set(bodies)) == len(bodies)
+
+
+def test_customer_stop_does_not_opt_out_merchant():
+    import asyncio
+    from vera.replies import respond
+    store = Store()
+    store.put_context("merchant", "m_1", 1, MERCHANT)
+    store.put_context("category", "dentists", 1, CATEGORY)
+    conv = store.conversation("cc1", "m_1", "c_1")
+    out = asyncio.run(respond(conv, "STOP", store=store))
+    assert out["action"] == "end"
+    mem = store.memory("m_1")
+    assert not mem.opted_out and "c_1" in mem.opted_out_customers
 
 
 def test_offer_normalisation_and_unsupported_claims():
