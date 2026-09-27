@@ -35,20 +35,22 @@ AUTO_REPLY = [
     r"this is an automated", r"do not reply", r"for (urgent|emergency) (queries|matters)",
 ]
 OPT_OUT = [
-    r"\bstop\b", r"unsubscribe", r"don'?t (message|text|contact|send)", r"do not (message|text|contact|send)",
+    r"(?<!don't )(?<!dont )(?<!never )\bstop\b(?! (worrying|thinking|there))", r"unsubscribe", r"don'?t (message|text|contact|send)", r"do not (message|text|contact|send)",
     r"leave me alone", r"remove (me|my number)", r"band karo", r"mat bhejo", r"message mat", r"block kar",
-    r"never (message|contact)", r"\bspam\b",
+    r"never (message|contact)", r"\bspam\b", r"बंद करो", r"मत भेजो", r"मैसेज मत",
 ]
 NOT_INTERESTED = [
     r"not interested", r"no thanks", r"no thank you", r"nahi chahiye", r"nahin chahiye", r"interest nahi",
     r"^(no|nope|nah|nahi|nahin)[.! ]*$", r"not now,? thanks", r"don'?t need", r"zarurat nahi",
+    r"नहीं चाहिए", r"नही चाहिए", r"(ज़|ज)रूरत नहीं", r"दिलचस्पी नहीं",
 ]
 ABUSE = [
-    r"\b(fuck|shit|bloody|idiot|stupid|nonsense|bakwas|bekaar|pagal|chutiya|harami|useless|irritat|annoying|bothering|pestering|rubbish)\b",
+    r"\b(fuck\w*|shit\w*|bloody|idiots?|stupid|nonsense|bakwas|bekaar|pagal|chutiya|harami|useless|irritat\w*|annoying|"
+    r"bother(ing)?|pestering|rubbish|scam\w*|fraud\w*)\b",
     r"why (are|do) you (keep )?(bother|messag|spam)",
 ]
 LATER = [
-    r"\b(later|busy|in a meeting|driving|call (me )?later|not now|some ?time|next week|tomorrow)\b",
+    r"\b(later|(?<!not )busy|in a meeting|driving|call (me )?later|not now|some ?time|next week|tomorrow)\b",
     r"\b(baad mein|abhi nahi|kal|thodi der|busy hoon|baad me)\b",
 ]
 # Strong commitment always means "act now"; a weak yes followed by a question is still a question.
@@ -62,7 +64,7 @@ WEAK_ACCEPT = [
 OFF_TOPIC = [
     r"\bgst\b", r"\bitr\b", r"income tax", r"\btax (filing|return)", r"\bloan\b", r"insurance", r"electricity bill",
     r"\blawyer\b", r"legal (notice|case|advice)", r"\bvisa\b", r"passport", r"cricket score", r"\brecipe\b",
-    r"\bjob\b", r"stock market", r"\bshare price", r"\bcrypto", r"politic", r"\bweather\b", r"horoscope",
+    r"\bjob\b", r"stock market", r"\bshare price", r"\bcrypto", r"politic", r"horoscope",
     r"bank (account|statement)", r"\bca\b.*(find|need)", r"accountant",
 ]
 QUESTION = [r"\?", r"^(what|how|why|when|where|which|who|can|could|will|is|are|do|does|kya|kaise|kab|kitna|kitne|kaun|kyun)\b"]
