@@ -178,13 +178,16 @@ async def respond(conv: Conversation, message: str, *, now: Optional[datetime] =
     if norm:
         mem.auto_reply_texts[norm] = seen + 1
 
-    if kind != "auto_reply":
+    if kind != "auto_reply" and not customer_facing:   # a customer's reply says nothing about the merchant's inbox
         mem.unanswered_nudges = 0
 
     # ---- terminal / waiting moves (no LLM) ----
     if kind == "opt_out":
-        mem.opted_out = True
         conv.status = "ended"
+        if customer_facing:   # only this customer opts out; the merchant still hears from Vera
+            mem.opted_out_customers.add(conv.customer_id)
+            return _end("Customer asked us to stop; opted this customer out of the merchant's outreach and closed the conversation.")
+        mem.opted_out = True
         return _end("Merchant asked us to stop; opted out of all future proactive messages and closed the conversation.")
     if kind == "not_interested":
         conv.status = "ended"

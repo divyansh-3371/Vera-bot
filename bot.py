@@ -143,6 +143,9 @@ def _plan(trigger_ids: list[str]) -> tuple[list[dict], list[str]]:
         if mem.opted_out:
             skipped.append(f"{tid}: merchant opted out")
             continue
+        if customer_facing and cid in mem.opted_out_customers:
+            skipped.append(f"{tid}: customer opted out")
+            continue
         key = trg.get("suppression_key") or tid
         if key in mem.sent_suppression_keys:
             skipped.append(f"{tid}: already sent ({key})")
@@ -243,8 +246,8 @@ async def reply(body: ReplyBody):
     if body.from_role == "customer" and not conv.turns:
         conv.send_as = "merchant_on_behalf"
     mem = STORE.memory(conv.merchant_id)
-    if mem.opted_out and conv.status == "ended":
-        return {"action": "end", "rationale": "Merchant previously opted out; staying silent."}
+    if conv.status == "ended" and (mem.opted_out or (conv.customer_id and conv.customer_id in mem.opted_out_customers)):
+        return {"action": "end", "rationale": "Recipient previously opted out; staying silent."}
     now = parse_dt(body.received_at)
     try:
         result = await asyncio.wait_for(respond(conv, body.message, now=now, deadline=started + REPLY_BUDGET_S),

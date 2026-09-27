@@ -42,6 +42,7 @@ class Conversation:
 class MerchantMemory:
     """Cross-conversation memory about a merchant (auto-replies, opt-outs, cadence)."""
     opted_out: bool = False
+    opted_out_customers: set[str] = field(default_factory=set)   # customers who said STOP to merchant_on_behalf messages
     auto_reply_texts: dict[str, int] = field(default_factory=dict)   # normalised text -> count
     auto_reply_hits: int = 0
     unanswered_nudges: int = 0
