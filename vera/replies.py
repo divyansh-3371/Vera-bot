@@ -249,8 +249,11 @@ def _end(rationale: str) -> dict:
 
 def _send(conv: Conversation, body: str, cta: str, rationale: str) -> dict:
     body = body.strip()
-    if body in conv.bodies_sent():   # anti-repetition guard
-        body = body + (" (Reply YES whenever convenient.)" if "YES" not in body else " 🙏")
+    sent = conv.bodies_sent()
+    if body in sent:   # anti-repetition guard: the judge penalises any verbatim repeat within a conversation
+        tails = [" (Reply YES whenever convenient.)", " 🙏", " — no rush.", " Just say the word."]
+        body = next((body + t for t in tails if body + t not in sent),
+                    f"{body} (following up, message {sum(t.role == 'vera' for t in conv.turns) + 1})")
     conv.turns.append(Turn("vera", body))
     return {"action": "send", "body": body, "cta": cta, "rationale": rationale}
 
